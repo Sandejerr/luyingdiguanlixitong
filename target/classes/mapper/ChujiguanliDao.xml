@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.ChujiguanliDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.username as username
+        ,a.password as password
+        ,a.chujiguanli_name as chujiguanliName
+        ,a.chujiguanli_phone as chujiguanliPhone
+        ,a.chujiguanli_id_number as chujiguanliIdNumber
+        ,a.chujiguanli_photo as chujiguanliPhoto
+        ,a.sex_types as sexTypes
+        ,a.chujiguanli_email as chujiguanliEmail
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.ChujiguanliView" >
+        SELECT
+        <include refid="Base_Column_List" />
+        <!-- 级联表的字段 -->
+
+        FROM chujiguanli  a
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test=" params.username != '' and params.username != null and params.username != 'null' ">
+                and a.username like CONCAT('%',#{params.username},'%')
+            </if>
+            <if test=" params.password != '' and params.password != null and params.password != 'null' ">
+                and a.password like CONCAT('%',#{params.password},'%')
+            </if>
+            <if test=" params.chujiguanliName != '' and params.chujiguanliName != null and params.chujiguanliName != 'null' ">
+                and a.chujiguanli_name like CONCAT('%',#{params.chujiguanliName},'%')
+            </if>
+            <if test=" params.chujiguanliPhone != '' and params.chujiguanliPhone != null and params.chujiguanliPhone != 'null' ">
+                and a.chujiguanli_phone like CONCAT('%',#{params.chujiguanliPhone},'%')
+            </if>
+            <if test=" params.chujiguanliIdNumber != '' and params.chujiguanliIdNumber != null and params.chujiguanliIdNumber != 'null' ">
+                and a.chujiguanli_id_number like CONCAT('%',#{params.chujiguanliIdNumber},'%')
+            </if>
+            <if test="params.sexTypes != null and params.sexTypes != ''">
+                and a.sex_types = #{params.sexTypes}
+            </if>
+            <if test=" params.chujiguanliEmail != '' and params.chujiguanliEmail != null and params.chujiguanliEmail != 'null' ">
+                and a.chujiguanli_email like CONCAT('%',#{params.chujiguanliEmail},'%')
+            </if>
+
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>

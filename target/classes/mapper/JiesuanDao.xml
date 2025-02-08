@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.JiesuanDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.jiedai_id as jiedaiId
+        ,a.yonghu_id as yonghuId
+        ,a.jiesuan_name as jiesuanName
+        ,a.jiesuan_uuid_number as jiesuanUuidNumber
+        ,a.jiesuan_photo as jiesuanPhoto
+        ,a.jiesuan_new_money as jiesuanNewMoney
+        ,a.jiesuan_zhuangtai_types as jiesuanZhuangtaiTypes
+        ,a.jiesuan_content as jiesuanContent
+        ,a.jiesuan_delete as jiesuanDelete
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.JiesuanView" >
+        SELECT
+        <include refid="Base_Column_List" />
+        <!-- 级联表的字段 -->
+        ,jiedai.yonghu_id as jiedaiYonghuId
+        ,jiedai.jiedai_name as jiedaiName
+        ,jiedai.jiedai_uuid_number as jiedaiUuidNumber
+        ,jiedai.jiedai_photo as jiedaiPhoto
+        ,jiedai.jiedai_types as jiedaiTypes
+        ,jiedai.jiedai_new_money as jiedaiNewMoney
+        ,jiedai.jiedai_zhuangtai_types as jiedaiZhuangtaiTypes
+        ,jiedai.jiedai_content as jiedaiContent
+        ,jiedai.jiedai_delete as jiedaiDelete
+        ,yonghu.yonghu_name as yonghuName
+        ,yonghu.yonghu_phone as yonghuPhone
+        ,yonghu.yonghu_id_number as yonghuIdNumber
+        ,yonghu.yonghu_photo as yonghuPhoto
+        ,yonghu.yonghu_email as yonghuEmail
+        ,yonghu.new_money as newMoney
+
+        FROM jiesuan  a
+        left JOIN jiedai jiedai ON a.jiedai_id = jiedai.id
+        left JOIN yonghu yonghu ON a.yonghu_id = yonghu.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.jiedaiId != null and params.jiedaiId != ''">
+                and (
+                    a.jiedai_id = #{params.jiedaiId}
+                )
+            </if>
+            <if test="params.yonghuId != null and params.yonghuId != ''">
+                and (
+                    a.yonghu_id = #{params.yonghuId}
+                    or jiedai.yonghu_id = #{params.yonghuId}
+                )
+            </if>
+            <if test=" params.jiesuanName != '' and params.jiesuanName != null and params.jiesuanName != 'null' ">
+                and a.jiesuan_name like CONCAT('%',#{params.jiesuanName},'%')
+            </if>
+            <if test=" params.jiesuanUuidNumber != '' and params.jiesuanUuidNumber != null and params.jiesuanUuidNumber != 'null' ">
+                and a.jiesuan_uuid_number like CONCAT('%',#{params.jiesuanUuidNumber},'%')
+            </if>
+            <if test="params.jiesuanNewMoneyStart != null ">
+                <![CDATA[  and a.jiesuan_new_money >= #{params.jiesuanNewMoneyStart}   ]]>
+            </if>
+            <if test="params.jiesuanNewMoneyEnd != null ">
+                <![CDATA[  and a.jiesuan_new_money <= #{params.jiesuanNewMoneyEnd}   ]]>
+            </if>
+            <if test="params.jiesuanZhuangtaiTypes != null and params.jiesuanZhuangtaiTypes != ''">
+                and a.jiesuan_zhuangtai_types = #{params.jiesuanZhuangtaiTypes}
+            </if>
+            <if test=" params.jiesuanContent != '' and params.jiesuanContent != null and params.jiesuanContent != 'null' ">
+                and a.jiesuan_content like CONCAT('%',#{params.jiesuanContent},'%')
+            </if>
+            <if test="params.jiesuanDeleteStart != null and params.jiesuanDeleteStart != ''">
+                <![CDATA[  and a.jiesuan_delete >= #{params.jiesuanDeleteStart}   ]]>
+            </if>
+            <if test="params.jiesuanDeleteEnd != null and params.jiesuanDeleteEnd != ''">
+                <![CDATA[  and a.jiesuan_delete <= #{params.jiesuanDeleteEnd}   ]]>
+            </if>
+             <if test="params.jiesuanDelete != null and params.jiesuanDelete != ''">
+                and a.jiesuan_delete = #{params.jiesuanDelete}
+             </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+                <!-- 判断接待的id不为空 -->
+            <if test=" params.jiedaiIdNotNull != '' and params.jiedaiIdNotNull != null and params.jiedaiIdNotNull != 'null' ">
+                and a.jiedai_id IS NOT NULL
+            </if>
+            <if test="params.yingdiId != null  and params.yingdiId != ''">
+                and jiedai.yingdi_id = #{params.yingdiId}
+            </if>
+            <if test=" params.jiedaiName != '' and params.jiedaiName != null and params.jiedaiName != 'null' ">
+                and jiedai.jiedai_name like CONCAT('%',#{params.jiedaiName},'%')
+            </if>
+            <if test=" params.jiedaiUuidNumber != '' and params.jiedaiUuidNumber != null and params.jiedaiUuidNumber != 'null' ">
+                and jiedai.jiedai_uuid_number like CONCAT('%',#{params.jiedaiUuidNumber},'%')
+            </if>
+            <if test="params.jiedaiTypes != null  and params.jiedaiTypes != ''">
+                and jiedai.jiedai_types = #{params.jiedaiTypes}
+            </if>
+
+            <if test="params.jiedaiNewMoneyStart != null ">
+                <![CDATA[  and jiedai.jiedai_new_money >= #{params.jiedaiNewMoneyStart}   ]]>
+            </if>
+            <if test="params.jiedaiNewMoneyEnd != null ">
+                <![CDATA[  and jiedai.jiedai_new_money <= #{params.jiedaiNewMoneyEnd}   ]]>
+            </if>
+            <if test="params.jiedaiZhuangtaiTypes != null  and params.jiedaiZhuangtaiTypes != ''">
+                and jiedai.jiedai_zhuangtai_types = #{params.jiedaiZhuangtaiTypes}
+            </if>
+
+            <if test=" params.jiedaiContent != '' and params.jiedaiContent != null and params.jiedaiContent != 'null' ">
+                and jiedai.jiedai_content like CONCAT('%',#{params.jiedaiContent},'%')
+            </if>
+            <if test="params.jiedaiDeleteStart != null  and params.jiedaiDeleteStart != '' ">
+                <![CDATA[  and jiedai.jiedai_delete >= #{params.jiedaiDeleteStart}   ]]>
+            </if>
+            <if test="params.jiedaiDeleteEnd != null  and params.jiedaiDeleteEnd != '' ">
+                <![CDATA[  and jiedai.jiedai_delete <= #{params.jiedaiDeleteEnd}   ]]>
+            </if>
+            <if test="params.jiedaiDelete != null  and params.jiedaiDelete != '' ">
+                and jiedai.jiedai_delete = #{params.jiedaiDelete}
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(jiedai.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(jiedai.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+                <!-- 判断用户的id不为空 -->
+            <if test=" params.yonghuIdNotNull != '' and params.yonghuIdNotNull != null and params.yonghuIdNotNull != 'null' ">
+                and a.yonghu_id IS NOT NULL
+            </if>
+            <if test=" params.yonghuName != '' and params.yonghuName != null and params.yonghuName != 'null' ">
+                and yonghu.yonghu_name like CONCAT('%',#{params.yonghuName},'%')
+            </if>
+            <if test=" params.yonghuPhone != '' and params.yonghuPhone != null and params.yonghuPhone != 'null' ">
+                and yonghu.yonghu_phone like CONCAT('%',#{params.yonghuPhone},'%')
+            </if>
+            <if test=" params.yonghuIdNumber != '' and params.yonghuIdNumber != null and params.yonghuIdNumber != 'null' ">
+                and yonghu.yonghu_id_number like CONCAT('%',#{params.yonghuIdNumber},'%')
+            </if>
+            <if test=" params.yonghuEmail != '' and params.yonghuEmail != null and params.yonghuEmail != 'null' ">
+                and yonghu.yonghu_email like CONCAT('%',#{params.yonghuEmail},'%')
+            </if>
+            <if test="params.newMoneyStart != null ">
+                <![CDATA[  and yonghu.new_money >= #{params.newMoneyStart}   ]]>
+            </if>
+            <if test="params.newMoneyEnd != null ">
+                <![CDATA[  and yonghu.new_money <= #{params.newMoneyEnd}   ]]>
+            </if>
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>

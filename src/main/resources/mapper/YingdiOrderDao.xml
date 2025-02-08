@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.YingdiOrderDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.yingdi_id as yingdiId
+        ,a.yonghu_id as yonghuId
+        ,a.yingdi_order_time as yingdiOrderTime
+        ,a.yingdi_order_true_price as yingdiOrderTruePrice
+        ,a.yingdi_order_types as yingdiOrderTypes
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.YingdiOrderView" >
+        SELECT
+        <include refid="Base_Column_List" />
+        <!-- 级联表的字段 -->
+        ,yingdi.yingdi_name as yingdiName
+        ,yingdi.yingdi_uuid_number as yingdiUuidNumber
+        ,yingdi.yingdi_photo as yingdiPhoto
+        ,yingdi.yingdi_address as yingdiAddress
+        ,yingdi.yingdi_types as yingdiTypes
+        ,yingdi.yingdi_new_money as yingdiNewMoney
+        ,yingdi.yingdi_zhuangtai_types as yingdiZhuangtaiTypes
+        ,yingdi.yingdi_clicknum as yingdiClicknum
+        ,yingdi.yingdi_content as yingdiContent
+        ,yingdi.yingdi_delete as yingdiDelete
+        ,yonghu.yonghu_name as yonghuName
+        ,yonghu.yonghu_phone as yonghuPhone
+        ,yonghu.yonghu_id_number as yonghuIdNumber
+        ,yonghu.yonghu_photo as yonghuPhoto
+        ,yonghu.yonghu_email as yonghuEmail
+        ,yonghu.new_money as newMoney
+
+        FROM yingdi_order  a
+        left JOIN yingdi yingdi ON a.yingdi_id = yingdi.id
+        left JOIN yonghu yonghu ON a.yonghu_id = yonghu.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.yingdiId != null and params.yingdiId != ''">
+                and (
+                    a.yingdi_id = #{params.yingdiId}
+                )
+            </if>
+            <if test="params.yonghuId != null and params.yonghuId != ''">
+                and (
+                    a.yonghu_id = #{params.yonghuId}
+                )
+            </if>
+            <if test=" params.yingdiOrderTimeStart != '' and params.yingdiOrderTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.yingdi_order_time) >= UNIX_TIMESTAMP(#{params.yingdiOrderTimeStart}) ]]>
+            </if>
+            <if test=" params.yingdiOrderTimeEnd != '' and params.yingdiOrderTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.yingdi_order_time) <= UNIX_TIMESTAMP(#{params.yingdiOrderTimeEnd}) ]]>
+            </if>
+            <if test="params.yingdiOrderTruePriceStart != null ">
+                <![CDATA[  and a.yingdi_order_true_price >= #{params.yingdiOrderTruePriceStart}   ]]>
+            </if>
+            <if test="params.yingdiOrderTruePriceEnd != null ">
+                <![CDATA[  and a.yingdi_order_true_price <= #{params.yingdiOrderTruePriceEnd}   ]]>
+            </if>
+            <if test="params.yingdiOrderTypes != null and params.yingdiOrderTypes != ''">
+                and a.yingdi_order_types = #{params.yingdiOrderTypes}
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+                <!-- 判断营地的id不为空 -->
+            <if test=" params.yingdiIdNotNull != '' and params.yingdiIdNotNull != null and params.yingdiIdNotNull != 'null' ">
+                and a.yingdi_id IS NOT NULL
+            </if>
+            <if test=" params.yingdiName != '' and params.yingdiName != null and params.yingdiName != 'null' ">
+                and yingdi.yingdi_name like CONCAT('%',#{params.yingdiName},'%')
+            </if>
+            <if test=" params.yingdiUuidNumber != '' and params.yingdiUuidNumber != null and params.yingdiUuidNumber != 'null' ">
+                and yingdi.yingdi_uuid_number like CONCAT('%',#{params.yingdiUuidNumber},'%')
+            </if>
+            <if test=" params.yingdiAddress != '' and params.yingdiAddress != null and params.yingdiAddress != 'null' ">
+                and yingdi.yingdi_address like CONCAT('%',#{params.yingdiAddress},'%')
+            </if>
+            <if test="params.yingdiTypes != null  and params.yingdiTypes != ''">
+                and yingdi.yingdi_types = #{params.yingdiTypes}
+            </if>
+
+            <if test="params.yingdiNewMoneyStart != null ">
+                <![CDATA[  and yingdi.yingdi_new_money >= #{params.yingdiNewMoneyStart}   ]]>
+            </if>
+            <if test="params.yingdiNewMoneyEnd != null ">
+                <![CDATA[  and yingdi.yingdi_new_money <= #{params.yingdiNewMoneyEnd}   ]]>
+            </if>
+            <if test="params.yingdiZhuangtaiTypes != null  and params.yingdiZhuangtaiTypes != ''">
+                and yingdi.yingdi_zhuangtai_types = #{params.yingdiZhuangtaiTypes}
+            </if>
+
+            <if test="params.yingdiClicknumStart != null  and params.yingdiClicknumStart != '' ">
+                <![CDATA[  and yingdi.yingdi_clicknum >= #{params.yingdiClicknumStart}   ]]>
+            </if>
+            <if test="params.yingdiClicknumEnd != null  and params.yingdiClicknumEnd != '' ">
+                <![CDATA[  and yingdi.yingdi_clicknum <= #{params.yingdiClicknumEnd}   ]]>
+            </if>
+            <if test="params.yingdiClicknum != null  and params.yingdiClicknum != '' ">
+                and yingdi.yingdi_clicknum = #{params.yingdiClicknum}
+            </if>
+            <if test=" params.yingdiContent != '' and params.yingdiContent != null and params.yingdiContent != 'null' ">
+                and yingdi.yingdi_content like CONCAT('%',#{params.yingdiContent},'%')
+            </if>
+            <if test="params.yingdiDeleteStart != null  and params.yingdiDeleteStart != '' ">
+                <![CDATA[  and yingdi.yingdi_delete >= #{params.yingdiDeleteStart}   ]]>
+            </if>
+            <if test="params.yingdiDeleteEnd != null  and params.yingdiDeleteEnd != '' ">
+                <![CDATA[  and yingdi.yingdi_delete <= #{params.yingdiDeleteEnd}   ]]>
+            </if>
+            <if test="params.yingdiDelete != null  and params.yingdiDelete != '' ">
+                and yingdi.yingdi_delete = #{params.yingdiDelete}
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(yingdi.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(yingdi.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+                <!-- 判断用户的id不为空 -->
+            <if test=" params.yonghuIdNotNull != '' and params.yonghuIdNotNull != null and params.yonghuIdNotNull != 'null' ">
+                and a.yonghu_id IS NOT NULL
+            </if>
+            <if test=" params.yonghuName != '' and params.yonghuName != null and params.yonghuName != 'null' ">
+                and yonghu.yonghu_name like CONCAT('%',#{params.yonghuName},'%')
+            </if>
+            <if test=" params.yonghuPhone != '' and params.yonghuPhone != null and params.yonghuPhone != 'null' ">
+                and yonghu.yonghu_phone like CONCAT('%',#{params.yonghuPhone},'%')
+            </if>
+            <if test=" params.yonghuIdNumber != '' and params.yonghuIdNumber != null and params.yonghuIdNumber != 'null' ">
+                and yonghu.yonghu_id_number like CONCAT('%',#{params.yonghuIdNumber},'%')
+            </if>
+            <if test=" params.yonghuEmail != '' and params.yonghuEmail != null and params.yonghuEmail != 'null' ">
+                and yonghu.yonghu_email like CONCAT('%',#{params.yonghuEmail},'%')
+            </if>
+            <if test="params.newMoneyStart != null ">
+                <![CDATA[  and yonghu.new_money >= #{params.newMoneyStart}   ]]>
+            </if>
+            <if test="params.newMoneyEnd != null ">
+                <![CDATA[  and yonghu.new_money <= #{params.newMoneyEnd}   ]]>
+            </if>
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>

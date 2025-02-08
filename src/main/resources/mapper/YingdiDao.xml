@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.YingdiDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.yingdi_name as yingdiName
+        ,a.yingdi_uuid_number as yingdiUuidNumber
+        ,a.yingdi_photo as yingdiPhoto
+        ,a.yingdi_address as yingdiAddress
+        ,a.yingdi_types as yingdiTypes
+        ,a.yingdi_new_money as yingdiNewMoney
+        ,a.yingdi_zhuangtai_types as yingdiZhuangtaiTypes
+        ,a.yingdi_clicknum as yingdiClicknum
+        ,a.yingdi_content as yingdiContent
+        ,a.yingdi_delete as yingdiDelete
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.YingdiView" >
+        SELECT
+        <include refid="Base_Column_List" />
+        <!-- 级联表的字段 -->
+
+        FROM yingdi  a
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test=" params.yingdiName != '' and params.yingdiName != null and params.yingdiName != 'null' ">
+                and a.yingdi_name like CONCAT('%',#{params.yingdiName},'%')
+            </if>
+            <if test=" params.yingdiUuidNumber != '' and params.yingdiUuidNumber != null and params.yingdiUuidNumber != 'null' ">
+                and a.yingdi_uuid_number like CONCAT('%',#{params.yingdiUuidNumber},'%')
+            </if>
+            <if test=" params.yingdiAddress != '' and params.yingdiAddress != null and params.yingdiAddress != 'null' ">
+                and a.yingdi_address like CONCAT('%',#{params.yingdiAddress},'%')
+            </if>
+            <if test="params.yingdiTypes != null and params.yingdiTypes != ''">
+                and a.yingdi_types = #{params.yingdiTypes}
+            </if>
+            <if test="params.yingdiNewMoneyStart != null ">
+                <![CDATA[  and a.yingdi_new_money >= #{params.yingdiNewMoneyStart}   ]]>
+            </if>
+            <if test="params.yingdiNewMoneyEnd != null ">
+                <![CDATA[  and a.yingdi_new_money <= #{params.yingdiNewMoneyEnd}   ]]>
+            </if>
+            <if test="params.yingdiZhuangtaiTypes != null and params.yingdiZhuangtaiTypes != ''">
+                and a.yingdi_zhuangtai_types = #{params.yingdiZhuangtaiTypes}
+            </if>
+            <if test="params.yingdiClicknumStart != null and params.yingdiClicknumStart != ''">
+                <![CDATA[  and a.yingdi_clicknum >= #{params.yingdiClicknumStart}   ]]>
+            </if>
+            <if test="params.yingdiClicknumEnd != null and params.yingdiClicknumEnd != ''">
+                <![CDATA[  and a.yingdi_clicknum <= #{params.yingdiClicknumEnd}   ]]>
+            </if>
+             <if test="params.yingdiClicknum != null and params.yingdiClicknum != ''">
+                and a.yingdi_clicknum = #{params.yingdiClicknum}
+             </if>
+            <if test=" params.yingdiContent != '' and params.yingdiContent != null and params.yingdiContent != 'null' ">
+                and a.yingdi_content like CONCAT('%',#{params.yingdiContent},'%')
+            </if>
+            <if test="params.yingdiDeleteStart != null and params.yingdiDeleteStart != ''">
+                <![CDATA[  and a.yingdi_delete >= #{params.yingdiDeleteStart}   ]]>
+            </if>
+            <if test="params.yingdiDeleteEnd != null and params.yingdiDeleteEnd != ''">
+                <![CDATA[  and a.yingdi_delete <= #{params.yingdiDeleteEnd}   ]]>
+            </if>
+             <if test="params.yingdiDelete != null and params.yingdiDelete != ''">
+                and a.yingdi_delete = #{params.yingdiDelete}
+             </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>
